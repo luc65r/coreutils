@@ -10,6 +10,10 @@
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           binutils
+          gnumake
+          gdb
+          pv
+          hyperfine
         ];
       };
     });
