@@ -1,3 +1,7 @@
+MAKEFLAGS += -rR
+
+all:
+
 %.o: %.s Makefile
 	as --64 -march=generic64 -o $@ $<
 
