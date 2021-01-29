@@ -12,6 +12,7 @@ _start:
 	cmpq	$1, %r12
 	je	no_args
 
+	xorq	%r15, %r15
 	leaq	8(%rsp), %r13 # argv
 arg_loop:
 	addq	$8, %r13
@@ -19,9 +20,14 @@ arg_loop:
 	jz	exit
 
 	movq	(%r13), %rdi # filename
+
+	test	%r15, %r15
+	jnz	bypass_options
+
 	cmpb	$'-', (%rdi)
 	je	option_or_stdin
 
+bypass_options:
 	movq	$2, %rax # sys_open
 	xorq	%rsi, %rsi # flags
 	xorq	%rdx, %rdx # mode
@@ -41,6 +47,8 @@ arg_loop:
 
 
 option_or_stdin:
+	cmpb	$'-', 1(%rdi)
+	sete	%r15b
 	cmpb	$0, 1(%rdi)
 	je	stdin
 	jmp	arg_loop
