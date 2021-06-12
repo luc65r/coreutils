@@ -7,7 +7,7 @@ enum Action <build run test bench>;
 class Language {
     has Str:D $.name is required;
     has Str:D @.extensions is required;
-    has &.build = -> $, $ {
+    has &.build = -> $ {
         die "Building $!name is not yet implemented";
     };
 }
@@ -16,17 +16,17 @@ my @languages = [
     Language.new(
         name => "C",
         extensions => <c>,
-        build => -> $input, $output {
-            run("cc", "-o", $output, "-O", "-g",
+        build => -> $program {
+            run("cc", "-o", $program.output, "-O", "-g",
                 "-Wall", "-Wextra", "-Wpedantic", "-Wconversion",
-                "-std=c99", $input);
+                "-std=c99", $program.source);
         }
     ),
     Language.new(
         name => "Zig",
         extensions => <zig>,
-        build => -> $input, $output {
-            run("zig", "build-exe", "-femit-bin=$output", $input);
+        build => -> $program {
+            run("zig", "build-exe", "-femit-bin=" ~ $program.output, $program.source);
         }
     ),
     Language.new(
@@ -40,11 +40,11 @@ my @languages = [
     Language.new(
         name => "raku",
         extensions => <raku>,
-        build => -> $input, $output {
-            my $buf = $input.slurp: :bin;
+        build => -> $program {
+            my $buf = $program.source.slurp: :bin;
             $buf.prepend: "#!/usr/bin/env raku\n\n".encode;
-            $output.spurt: $buf;
-            $output.chmod: 0o755;
+            $program.output.spurt: $buf;
+            $program.output.chmod: 0o755;
         }
     ),
 ];
@@ -67,7 +67,7 @@ class Program {
     }
 
     method build() {
-        $.lang.build.($.source, $.output);
+        $.lang.build.(self);
     }
 }
 
