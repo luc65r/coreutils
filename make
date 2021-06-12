@@ -81,6 +81,14 @@ sub MAIN(
             $program.build;
         }
 
+        when test {
+            $program.build;
+
+            use lib "tests";
+            require ::($program.name) <&test>;
+            test($program.output);
+        }
+
         default {
             die "$action is not yet implemented";
         }
