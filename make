@@ -26,7 +26,9 @@ my @languages = [
         name => "Zig",
         extensions => <zig>,
         build => -> $program {
-            run("zig", "build-exe", "-femit-bin=" ~ $program.output, $program.source);
+            run("zig", "build-exe",
+                "--cache-dir", $program.build-dir.add("zig-build"),
+                "-femit-bin=" ~ $program.output, $program.source);
         }
     ),
     Language.new(
