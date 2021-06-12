@@ -32,10 +32,18 @@ my @languages = [
     Language.new(
         name => "GNU assembly",
         extensions => <s>,
+        build => -> $program {
+            my $object = $program.build-dir.add: $program.name ~ ".o";
+            run("as", "--64", "-march=generic64", "-o", $object, $program.source);
+            run("ld", "-o", $program.output, $object);
+        }
     ),
     Language.new(
         name => "nasm assembly",
         extensions => <asm>,
+        build => -> $program {
+            run("nasm", "-f", "bin", "-o", $program.output, $program.source);
+        }
     ),
     Language.new(
         name => "raku",
@@ -51,18 +59,21 @@ my @languages = [
 
 class Program {
     has Str:D $.name is required;
-    has IO::Path:D $.source is required;
+    has IO::Path:D $.build-dir is required where * ~~ :d & :w;
+    has IO::Path:D $.source is required where * ~~ :f & :r;
     has IO::Path:D $.output is required;
     has Language:D $.lang is required;
 
     method new(IO::Path:D $source where * ~~ :f & :r) {
         my $extension = $source.extension;
         my $name = $source.extension('').basename;
+        my $build-dir = "build".IO;
         self.bless(
+            :$build-dir,
             :$name,
             :$source,
-            output => "build/$name".IO,
-            lang => @languages.first: { $extension ∈ .extensions },
+            output => $build-dir.add($name),
+            lang => @languages.first($extension ∈ *.extensions),
         )
     }
 
