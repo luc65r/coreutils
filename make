@@ -44,7 +44,7 @@ my @languages = [
         name => "nasm assembly",
         extensions => <asm>,
         build => -> $program {
-            run("nasm", "-f", "bin", "-o", $program.output, $program.source);
+            run("nasm", "-f", "bin", "-o", $program.output, $program.source, :out);
         }
     ),
     Language.new(
@@ -99,6 +99,7 @@ sub MAIN(
 
             use lib "tests";
             require ::($program.name) <&test>;
+            say "testing " ~ $program.source;
             test($program.output);
         }
 
