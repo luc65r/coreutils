@@ -14,6 +14,11 @@
           gdb
           pv
           hyperfine
+          man-pages
+          nasm
+          zig
+          rakudo
+          rlwrap
         ];
       };
     });
