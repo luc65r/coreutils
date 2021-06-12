@@ -54,7 +54,6 @@ my @languages = [
             my $buf = $program.source.slurp: :bin;
             $buf.prepend: "#!/usr/bin/env raku\n\n".encode;
             $program.output.spurt: $buf;
-            $program.output.chmod: 0o755;
         }
     ),
 ];
@@ -81,6 +80,7 @@ class Program {
 
     method build() {
         $.lang.build.(self);
+        $.output.chmod: 0o755;
     }
 }
 
